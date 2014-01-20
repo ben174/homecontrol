@@ -5,7 +5,7 @@ import settings
 
 
 def parse_command(line):
-    b = Bridge('10.0.1.147')
+    b = Bridge(settings.HUE_BRIDGE)
     b.connect()
     b.get_api()
     line_split = line.split()
