@@ -1,6 +1,7 @@
 from pygsr import Pygsr
 from phue import Bridge
 import time
+import settings
 
 
 def parse_command(line):
@@ -40,6 +41,14 @@ def parse_command(line):
         command = 'hue'
         # hue colors go here
 
+    if 'temperature' in line_split:
+        command = 'temperature'
+        for word in line_split:
+            try:
+                value = int(word)
+            except:
+                pass
+
     color_names = [color for _, color in enumerate(colors)]
     for color_name in color_names:
         if color_name in line:
@@ -63,7 +72,7 @@ def parse_command(line):
     print 'Command: %s' % (line)
     print 'Room: %s, Command: %s, Value: %s' % (room, command, value)
 
-    if not (room and command and value):
+    if not (command and value):
         return False
 
     if command == 'power':
@@ -79,7 +88,21 @@ def parse_command(line):
             b.set_light(light_index,'hue', value[0])
             b.set_light(light_index,'sat', 255)
         return True
+    elif command == 'temperature':
+        if value:
+            set_temperature(value)
+            return True
+        else:
+            print 'Could not determine a temperature.'
     return False
+
+
+def set_temperature(degrees):
+    from nest import Nest
+    nest = Nest(username=settings.NEST_LOGIN, password=settings.NEST_PASS)
+    nest.login()
+    nest.get_status()
+    nest.set_temperature(degrees)
 
 
 def record_command():
@@ -94,5 +117,3 @@ if __name__ == '__main__':
     line = record_command()
     #line = 'set the office lights to red'
     parse_command(line)
-
-
