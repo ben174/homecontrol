@@ -47,15 +47,13 @@ def parse_command(line):
             except:
                 pass
 
-    color_names = [color for _, color in enumerate(colors)]
-    for color_name in color_names:
+    for color_name in colors.keys():
         if color_name in line:
             print 'found color: %s' % color_name
             command = 'hue'
             value = colors[color_name]
 
-    room_names = [group for _, group in enumerate(light_groups)]
-    for room_name in room_names:
+    for room_name in light_groups.keys():
         if room_name in line:
             room = room_name
 
