@@ -1,4 +1,4 @@
-''' automate.py  - Written by Ben Friedland
+''' automate.py  - Written by Ben Friedland - http://www.bugben.com
 
     A tool to automate my house via voice commands. Accepts commands like:
         'Turn office lights on'
@@ -7,16 +7,13 @@
         'Turn living room into a rainbow.'
 '''
 
-from pygsr import Pygsr
-from phue import Bridge
-import time
-import settings
-
 
 def parse_command(line):
     ''' Takes a line of english text and tries to interpret it into a command
 
     '''
+    from phue import Bridge
+    import settings
     b = Bridge(settings.HUE_BRIDGE)
     b.connect()
     b.get_api()
@@ -117,6 +114,7 @@ def set_temperature(degrees):
 
     '''
     from nest import Nest
+    import settings
     nest = Nest(username=settings.NEST_LOGIN, password=settings.NEST_PASS)
     nest.login()
     nest.get_status()
@@ -127,6 +125,7 @@ def record_command():
     ''' Records audio and sends it to google to translate to text
 
     '''
+    from pygsr import Pygsr
     speech = Pygsr()
     speech.record(3, 1)
     result = speech.speech_to_text('en-US')
@@ -139,6 +138,8 @@ def get_office_lights():
     to plug in to presets.
 
     '''
+    from phue import Bridge
+    import settings
     b = Bridge(settings.HUE_BRIDGE)
     b.connect()
     b.get_api()
