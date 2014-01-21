@@ -5,6 +5,8 @@
         'Turn upstairs lights blue'
         'Set temperature to 68'
         'Turn living room into a rainbow.'
+        'Set staircase brightness to 5.' (1-10 scale)
+
 '''
 
 
@@ -41,8 +43,13 @@ def parse_command(line):
         'house': range(1, 10),
     }
 
-    if 'brightness' in line_split:
+    if 'brightness' in line_split or 'dim' in line_split:
         command = 'dim'
+        for word in line_split:
+            try:
+                value = int(word)
+            except:
+                pass
 
     if 'color' in line_split:
         command = 'hue'
@@ -92,6 +99,12 @@ def parse_command(line):
                 # reset color
                 b.set_light(light_index, 'hue', 15331)
                 b.set_light(light_index, 'sat', 121)
+        return True
+    elif command == 'dim':
+        for light_index in light_groups[room]:
+            brightness = int(255 * (value*0.1))
+            print 'Setting bright %s: %s' % (str(light_index), str(brightness))
+            b.set_light(light_index, 'bri', brightness)
         return True
     elif command == 'hue':
         for light_index in light_groups[room]:
