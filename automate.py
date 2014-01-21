@@ -12,25 +12,8 @@
 
 import logging
 import settings
+from command import Command
 logger = None
-
-
-class Command:
-    room = None
-    action = None
-    value = None
-
-    def __init__(self, room=None, action=None, value=None):
-        self.room = room
-        self.action = action
-        self.value = value
-
-    def __repr__(self):
-        return "Room: %s, Action: %s, Value: %s" % (
-            self.room,
-            self.action,
-            self.value,
-        )
 
 
 def clean_command(line):
@@ -89,7 +72,7 @@ def parse_command(line):
         command.room = 'house'
 
     logger.info('Command: %s' % (line))
-    logger.debug('Room: %s, Command: %s, Value: %s' % (room, command, value))
+    logger.debug(str(command))
 
     return command
 
