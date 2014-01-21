@@ -187,8 +187,7 @@ def setup_logging():
 
 def main():
     setup_logging()
-    #line = record_command()
-    line = 'set living room brightness to 5'
+    line = record_command()
     if not line:
         logger.warn('No command recorded.')
         return
