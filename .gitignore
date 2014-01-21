@@ -39,3 +39,11 @@ nosetests.xml
 venv
 
 settings.py
+
+
+audio
+audio.flac
+
+*.un~
+
+*.log

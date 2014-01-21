@@ -10,116 +10,140 @@
 
 '''
 
+import logging
+import settings
+logger = None
+
+
+class Command:
+    room = None
+    action = None
+    value = None
+
+    def __init__(self, room=None, action=None, value=None):
+        self.room = room
+        self.action = action
+        self.value = value
+
+    def __repr__(self):
+        return "Room: %s, Action: %s, Value: %s" % (
+            self.room,
+            self.action,
+            self.value,
+        )
+
+
+def clean_command(line):
+    ''' Cleans up some common errors made by the voice interpreter.
+
+    '''
+    line = line.replace('read', 'red')
+    return line
+
 
 def parse_command(line):
     ''' Takes a line of english text and tries to interpret it into a command
 
     '''
-    from phue import Bridge
-    import settings
-    b = Bridge(settings.HUE_BRIDGE)
-    b.connect()
-    b.get_api()
     line_split = line.split()
 
-    room = None
-    command = None
-    value = None
+    command = Command()
 
-    colors = {
-        'red': [0],
-        'read': [0],
-        'green': [25500],
-        'blue': [46920],
-        'rainbow': [0, 25500, 46920],
-    }
-
-    light_groups = {
-        'office': [7, 8, 9],
-        'living': [6, 3, 1],
-        'upstairs': [4, 5],
-        'kitchen': [2],
-        'bedroom': [5],
-        'stairs': [4, 6],
-        'house': range(1, 10),
-    }
 
     if 'brightness' in line_split or 'dim' in line_split:
-        command = 'dim'
+        command.action = 'dim'
         for word in line_split:
             try:
-                value = int(word)
+                command.value = int(word)
             except:
                 pass
 
     if 'color' in line_split:
-        command = 'hue'
+        command.action = 'hue'
         # hue colors go here
 
     if 'temperature' in line_split:
-        command = 'temperature'
+        command.action = 'temperature'
         for word in line_split:
             try:
-                value = int(word)
+                command.value = int(word)
             except:
                 pass
 
-    for color_name in colors.keys():
+    for color_name in settings.COLORS.keys():
         if color_name in line:
-            print 'found color: %s' % color_name
-            command = 'hue'
-            value = colors[color_name]
+            logger.debug('Found color: %s' % color_name)
+            command.action = 'hue'
+            command.value = settings.COLORS[color_name]
 
-    for room_name in light_groups.keys():
+    for room_name in settings.LIGHT_GROUPS.keys():
         if room_name in line:
-            room = room_name
+            command.room = room_name
 
     if 'on' in line_split:
-        command = 'power'
-        value = 'on'
+        command.action = 'power'
+        command.value = 'on'
     elif 'off' in line_split:
-        command = 'power'
-        value = 'off'
+        command.action = 'power'
+        command.value = 'off'
 
-    print 'Command: %s' % (line)
-    print 'Room: %s, Command: %s, Value: %s' % (room, command, value)
+    #logger.info('Command: %s' % (line))
+    #logger.debug('Room: %s, Command: %s, Value: %s' % (room, command, value))
 
-    if not (command and value):
-        return False
+    if not command.room:
+        logger.debug('You didn\'t specify a room. Assuming the whole house.')
+        command.room = 'house'
 
-    if not room:
-        print 'You didn\'t specify a room. Assuming the whole house.'
-        room = 'house'
+    return command
 
-    if command == 'power':
-        light_state = (value == 'on')
-        for light_index in light_groups[room]:
-            print 'Setting light %s: %s' % (str(light_index), str(light_state))
+
+
+def execute_command(command):
+    print 'Comamnd: %s' % str(command)
+    from phue import Bridge
+    b = Bridge(settings.HUE_BRIDGE)
+    b.connect()
+    b.get_api()
+    if command.action == 'power':
+        light_state = (command.value == 'on')
+        for light_index in settings.LIGHT_GROUPS[command.room]:
+            logger.debug('Setting light %s: %s' % (
+                str(light_index),
+                str(light_state)
+            ))
             b.set_light(light_index, 'on', light_state)
             if light_state:
                 # reset color
                 b.set_light(light_index, 'hue', 15331)
                 b.set_light(light_index, 'sat', 121)
         return True
-    elif command == 'dim':
-        for light_index in light_groups[room]:
-            brightness = int(255 * (value*0.1))
-            print 'Setting bright %s: %s' % (str(light_index), str(brightness))
+    elif command.action == 'dim':
+        for light_index in settings.LIGHT_GROUPS[command.room]:
+            brightness = int(255 * (command.value*0.1))
+            logger.debug('Setting bright %s: %s' % (
+                str(light_index),
+                str(brightness)
+            ))
             b.set_light(light_index, 'bri', brightness)
         return True
-    elif command == 'hue':
-        for light_index in light_groups[room]:
-            print 'Setting hue %s: %s' % (str(light_index), value[0])
+    elif command.action == 'hue':
+        curr_group = settings.LIGHT_GROUPS[command.room]
+        for index, light_index in enumerate(curr_group):
+            # iterates over each color for fades, gradients,etc
+            value = command.value[index % len(command.value)]
+            logger.debug('Setting hue %s: %s' % (
+                str(light_index), value
+            ))
             b.set_light(light_index, 'on', True)
-            b.set_light(light_index, 'hue', value[0])
+            b.set_light(light_index, 'hue', value)
             b.set_light(light_index, 'sat', 255)
         return True
-    elif command == 'temperature':
+    elif command.action == 'temperature':
         if value:
-            set_temperature(value)
+            set_temperature(command.value)
             return True
         else:
-            print 'Could not determine a temperature.'
+            logger.error('Could not determine a temperature.')
     return False
 
 
@@ -128,7 +152,6 @@ def set_temperature(degrees):
 
     '''
     from nest import Nest
-    import settings
     nest = Nest(username=settings.NEST_LOGIN, password=settings.NEST_PASS)
     nest.login()
     nest.get_status()
@@ -143,8 +166,9 @@ def record_command():
     speech = Pygsr()
     speech.record(3, 1)
     result = speech.speech_to_text('en-US')
-    line = result[0].lower()
-    return line
+    if result:
+        return result[0].lower()
+    return None
 
 
 def get_office_lights():
@@ -153,17 +177,45 @@ def get_office_lights():
 
     '''
     from phue import Bridge
-    import settings
     b = Bridge(settings.HUE_BRIDGE)
     b.connect()
     b.get_api()
     light_index = 9
-    print b.get_light(light_index, 'on')
-    print b.get_light(light_index, 'hue')
-    print b.get_light(light_index, 'sat')
+    logger.info(b.get_light(light_index, 'on'))
+    logger.info(b.get_light(light_index, 'hue'))
+    logger.info(b.get_light(light_index, 'sat'))
+
+
+def setup_logging():
+    # silence phue logging
+    phue_log = logging.getLogger("phue")
+    phue_log.setLevel(logging.WARNING)
+
+    global logger
+    logger = logging.getLogger("automate")
+    #logging.basicConfig(filename='automate.log',level=logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    logger.debug('debug message')
+    logger.info('info message')
+    logger.warn('warn message')
+    logger.error('error message')
+    logger.critical('critical message')
+
+
+def main():
+    setup_logging()
+    #line = record_command()
+    line = 'set living room brightness to 5'
+    if not line:
+        logger.warn('No command recorded.')
+        return
+    command = parse_command(line)
+    execute_command(command)
 
 
 if __name__ == '__main__':
-    line = record_command()
-    #line = 'set the office lights to red'
-    parse_command(line)
+    main()
