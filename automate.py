@@ -46,9 +46,7 @@ def parse_command(line):
 
     '''
     line_split = line.split()
-
     command = Command()
-
 
     if 'brightness' in line_split or 'dim' in line_split:
         command.action = 'dim'
@@ -60,7 +58,6 @@ def parse_command(line):
 
     if 'color' in line_split:
         command.action = 'hue'
-        # hue colors go here
 
     if 'temperature' in line_split:
         command.action = 'temperature'
@@ -87,15 +84,14 @@ def parse_command(line):
         command.action = 'power'
         command.value = 'off'
 
-    #logger.info('Command: %s' % (line))
-    #logger.debug('Room: %s, Command: %s, Value: %s' % (room, command, value))
-
     if not command.room:
         logger.debug('You didn\'t specify a room. Assuming the whole house.')
         command.room = 'house'
 
-    return command
+    logger.info('Command: %s' % (line))
+    logger.debug('Room: %s, Command: %s, Value: %s' % (room, command, value))
 
+    return command
 
 
 def execute_command(command):
@@ -172,7 +168,7 @@ def record_command():
 
 
 def get_office_lights():
-    ''' Gets the current state of my office lights so I know what values 
+    ''' Gets the current state of my office lights so I know what values
     to plug in to presets.
 
     '''
