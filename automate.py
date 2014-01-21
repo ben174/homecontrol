@@ -2,7 +2,8 @@
 
     A tool to automate my house via voice commands. Accepts commands like:
         'Turn office lights on'
-        'Turn upstairs lights blue'
+        'Turn the house red.'
+        'Turn upstairs lights blue.'
         'Set temperature to 68'
         'Turn living room into a rainbow.'
         'Set staircase brightness to 5.' (1-10 scale)
