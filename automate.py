@@ -28,6 +28,8 @@ def parse_command(line):
     ''' Takes a line of english text and tries to interpret it into a command
 
     '''
+    line = clean_command(line)
+    logger.info(line)
     line_split = line.split()
     command = Command()
 
@@ -118,7 +120,7 @@ def execute_command(command):
             b.set_light(light_index, 'sat', 255)
         return True
     elif command.action == 'temperature':
-        if value:
+        if command.value:
             set_temperature(command.value)
             return True
         else:
@@ -192,6 +194,7 @@ def main():
         logger.warn('No command recorded.')
         return
     command = parse_command(line)
+    logger.info(command)
     execute_command(command)
 
 
