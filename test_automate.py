@@ -1,18 +1,18 @@
-import automate
 import settings
+
+from command import Command
 
 
 class TestAutomate:
     def setup_class(self):
-        automate.setup_logging()
+        pass
 
     def test_temperature(self):
         ''' Make sure we can set the temperature
 
         '''
         command_text = 'set the temperature to 80 degrees'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.action == 'temperature'
         assert command.value == 80
 
@@ -21,8 +21,7 @@ class TestAutomate:
 
         '''
         command_text = 'set the office to read'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.room == 'office'
         assert command.action == 'hue'
         assert command.value == settings.COLORS['red']
@@ -32,8 +31,7 @@ class TestAutomate:
 
         '''
         command_text = 'turn the kitchen off'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.room == 'kitchen'
         assert command.action == 'power'
         assert command.value == 'off'
@@ -43,8 +41,7 @@ class TestAutomate:
 
         '''
         command_text = 'set the temperature 270'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.action == 'temperature'
         assert command.value == 70
 
@@ -53,8 +50,7 @@ class TestAutomate:
 
         '''
         command_text = 'make the office green'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.room == 'office'
         assert command.action == 'hue'
         assert command.value == settings.COLORS['green']
@@ -64,8 +60,7 @@ class TestAutomate:
 
         '''
         command_text = 'turn the house blue'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.room == 'house'
         assert command.action == 'hue'
         assert command.value == settings.COLORS['blue']
@@ -75,8 +70,7 @@ class TestAutomate:
 
         '''
         command_text = 'turn the office lights off'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.room == 'office'
         assert command.action == 'power'
         assert command.value == 'off'
@@ -86,8 +80,7 @@ class TestAutomate:
 
         '''
         command_text = 'turn the lights off'
-        command = automate.Command()
-        command = automate.parse_command(command_text)
+        command = Command(command_text)
         assert command.room == 'house'
         assert command.action == 'power'
         assert command.value == 'off'

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ''' automate.py  - Written by Ben Friedland - http://www.bugben.com
 
     A tool to automate my house via voice commands. Accepts commands like:
@@ -13,130 +14,8 @@
 import logging
 import settings
 from command import Command
+from control import Control
 logger = None
-
-
-def clean_command(line):
-    ''' Cleans up some common errors made by the voice interpreter.
-
-    '''
-    line = line.replace('read', 'red')
-    return line
-
-
-def parse_command(line):
-    ''' Takes a line of english text and tries to interpret it into a command
-
-    '''
-    line = clean_command(line)
-    logger.info(line)
-    line_split = line.split()
-    command = Command()
-
-    if 'brightness' in line_split or 'dim' in line_split:
-        command.action = 'dim'
-        for word in line_split:
-            try:
-                command.value = int(word)
-            except:
-                pass
-
-    if 'color' in line_split:
-        command.action = 'hue'
-
-    if 'temperature' in line_split:
-        command.action = 'temperature'
-        for word in line_split:
-            try:
-                command.value = int(word)
-            except:
-                pass
-
-    for color_name in settings.COLORS.keys():
-        if color_name in line:
-            logger.debug('Found color: %s' % color_name)
-            command.action = 'hue'
-            command.value = settings.COLORS[color_name]
-
-    for room_name in settings.LIGHT_GROUPS.keys():
-        if room_name in line:
-            command.room = room_name
-
-    if 'on' in line_split:
-        command.action = 'power'
-        command.value = 'on'
-    elif 'off' in line_split:
-        command.action = 'power'
-        command.value = 'off'
-
-    if not command.room:
-        logger.debug('You didn\'t specify a room. Assuming the whole house.')
-        command.room = 'house'
-
-    logger.info('Command: %s' % (line))
-    logger.debug(str(command))
-
-    return command
-
-
-def execute_command(command):
-    print 'Comamnd: %s' % str(command)
-    from phue import Bridge
-    b = Bridge(settings.HUE_BRIDGE)
-    b.connect()
-    b.get_api()
-    if command.action == 'power':
-        light_state = (command.value == 'on')
-        for light_index in settings.LIGHT_GROUPS[command.room]:
-            logger.debug('Setting light %s: %s' % (
-                str(light_index),
-                str(light_state)
-            ))
-            b.set_light(light_index, 'on', light_state)
-            if light_state:
-                # reset color
-                b.set_light(light_index, 'hue', 15331)
-                b.set_light(light_index, 'sat', 121)
-        return True
-    elif command.action == 'dim':
-        for light_index in settings.LIGHT_GROUPS[command.room]:
-            brightness = int(255 * (command.value*0.1))
-            logger.debug('Setting bright %s: %s' % (
-                str(light_index),
-                str(brightness)
-            ))
-            b.set_light(light_index, 'bri', brightness)
-        return True
-    elif command.action == 'hue':
-        curr_group = settings.LIGHT_GROUPS[command.room]
-        for index, light_index in enumerate(curr_group):
-            # iterates over each color for fades, gradients,etc
-            value = command.value[index % len(command.value)]
-            logger.debug('Setting hue %s: %s' % (
-                str(light_index), value
-            ))
-            b.set_light(light_index, 'on', True)
-            b.set_light(light_index, 'hue', value)
-            b.set_light(light_index, 'sat', 255)
-        return True
-    elif command.action == 'temperature':
-        if command.value:
-            set_temperature(command.value)
-            return True
-        else:
-            logger.error('Could not determine a temperature.')
-    return False
-
-
-def set_temperature(degrees):
-    ''' Sets temperature of nest thermostat to specified degrees.
-
-    '''
-    from nest import Nest
-    nest = Nest(username=settings.NEST_LOGIN, password=settings.NEST_PASS)
-    nest.login()
-    nest.get_status()
-    nest.set_temperature(degrees)
 
 
 def record_command():
@@ -174,28 +53,20 @@ def setup_logging():
 
     global logger
     logger = logging.getLogger("automate")
-    #logging.basicConfig(filename='automate.log',level=logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-    logger.debug('debug message')
-    logger.info('info message')
-    logger.warn('warn message')
-    logger.error('error message')
-    logger.critical('critical message')
+    logger.setLevel(logging.DEBUG)
 
 
 def main():
     setup_logging()
+    control = Control()
     line = record_command()
     if not line:
         logger.warn('No command recorded.')
         return
-    command = parse_command(line)
+    logger.info(line)
+    command = Command(line)
     logger.info(command)
-    execute_command(command)
+    control.execute_command(command)
 
 
 if __name__ == '__main__':
