@@ -28,8 +28,6 @@ Parses your voice and executes commands based on input.
 
 #### How it Works:
 ![HowItWorks](http://i.imgur.com/89TUlCQ.png "How It Works")
-http://i.imgur.com/89TUlCQ.png
-
 
 #### Requirements:
 
