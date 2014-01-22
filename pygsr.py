@@ -5,19 +5,27 @@ from os import system
 from json import loads
 import urllib2
 import subprocess
+import settings
+
 
 class Pygsr:
     def __init__(self, file="audio"):
         self.format = paInt16
-        self.rate = 44100
+        audio = PyAudio()
+        try:
+            calc_rate = audio.get_device_info_by_index(1)['defaultSampleRate']
+            print 'Discovered Sample Rate: %s' % calc_rate
+            self.rate = int(calc_rate)
+        except:
+            print 'Guessing sample rate of 44100'
+            self.rate = 44100
         self.channel = 1
         self.chunk = 1024
         self.file = file
 
     def convert(self):
         fh = open("NUL","w")
-        subprocess.call(['flac', '-f', self.file], stdout=fh, stderr=fh)
-
+        subprocess.call(settings.FLAC_CONVERT.split(), stdout=fh, stderr=fh)
 
     def record(self, time, device_i):
         audio = PyAudio()
