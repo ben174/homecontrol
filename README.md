@@ -26,6 +26,11 @@ Parses your voice and executes commands based on input.
 - Phillips Hue lighting - For lighting control
 - Nest Learning Thermostat - For temperature control
 
+#### How it Works:
+![HowItWorks](http://i.imgur.com/89TUlCQ.png "How It Works")
+http://i.imgur.com/89TUlCQ.png
+
+
 #### Requirements:
 
 - phue library - For controlling Phillips Hue lighting
