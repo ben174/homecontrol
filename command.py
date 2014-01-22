@@ -29,6 +29,7 @@ class Command:
 
         '''
         self.command_line = self.command_line.replace('read', 'red')
+        self.command_line = self.command_line.replace('blew', 'blue')
         #TODO: Fix the 270 degrees test
 
     def parse_command(self):

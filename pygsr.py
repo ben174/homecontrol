@@ -4,6 +4,7 @@ from urllib2 import Request, urlopen
 from os import system
 from json import loads
 import urllib2
+import subprocess
 
 class Pygsr:
     def __init__(self, file="audio"):
@@ -14,23 +15,23 @@ class Pygsr:
         self.file = file
 
     def convert(self):
-        print self.file
-        #system("sox %s -t wav -r 48000 -t flac %s.flac" % (self.file, self.file))
-        system("flac -f %s" % (self.file))
+        fh = open("NUL","w")
+        subprocess.call(['flac', '-f', self.file], stdout=fh, stderr=fh)
+
 
     def record(self, time, device_i):
         audio = PyAudio()
-        print audio.get_device_info_by_index(1)
+        #print audio.get_device_info_by_index(1)
         stream = audio.open(input_device_index=device_i,output_device_index=device_i,format=self.format, channels=self.channel,
                             rate=self.rate, input=True,
                             frames_per_buffer=self.chunk)
-        print "REC: "
+        print "Recording..."
         frames = []
         for i in range(0, self.rate / self.chunk * time):
             data = stream.read(self.chunk)
             frames.append(data)
         stream.stop_stream()
-        print "END"
+        print "Recording Complete"
         stream.close()
         audio.terminate()
         write_frames = open_audio(self.file, 'wb')
