@@ -4,6 +4,9 @@
 
 Parses your voice and executes commands based on input. 
 
+![BensOffice](http://i.imgur.com/Ze3IqW6.png "Ben's Office")
+
+
 ### Some commands it understands:
 
 - 'Turn office lights on'                                                 
@@ -22,6 +25,9 @@ Parses your voice and executes commands based on input.
 
 - Phillips Hue lighting - For lighting control
 - Nest Learning Thermostat - For temperature control
+
+#### How it Works:
+![HowItWorks](http://i.imgur.com/rPHMSuu.png "How It Works")
 
 #### Requirements:
 
