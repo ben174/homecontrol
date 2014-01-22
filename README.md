@@ -27,7 +27,7 @@ Parses your voice and executes commands based on input.
 - Nest Learning Thermostat - For temperature control
 
 #### How it Works:
-![HowItWorks](http://i.imgur.com/89TUlCQ.png "How It Works")
+![HowItWorks](http://i.imgur.com/rPHMSuu.png "How It Works")
 
 #### Requirements:
 
