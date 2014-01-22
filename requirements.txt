@@ -1,3 +1,7 @@
 PyAudio==0.2.7
 phue==0.7
+py==1.4.19
+pynest==1.0
+pytest==2.5.1
+test-pkg==0.0
 wsgiref==0.1.2
