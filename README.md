@@ -4,6 +4,9 @@
 
 Parses your voice and executes commands based on input. 
 
+![BensOffice](http://i.imgur.com/Ze3IqW6.png "Ben's Office")
+
+
 ### Some commands it understands:
 
 - 'Turn office lights on'                                                 
