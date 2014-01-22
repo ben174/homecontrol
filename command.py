@@ -36,44 +36,43 @@ class Command:
         into a command.
 
         '''
-        line_split = self.command_line.split()
+        words = self.command_line.split()
 
-        if 'brightness' in line_split or 'dim' in line_split:
+        if 'brightness' in words or 'dim' in words:
             self.action = 'dim'
-            for word in line_split:
+            for word in words:
                 try:
                     self.value = int(word)
                 except:
                     pass
 
-        if 'color' in line_split:
+        if 'color' in words:
             self.action = 'hue'
 
-        if 'temperature' in line_split:
+        if 'temperature' in words:
             self.action = 'temperature'
-            for word in line_split:
+            for word in words:
                 try:
                     self.value = int(word)
                 except:
                     pass
 
         for color_name in settings.COLORS.keys():
-            if color_name in line_split:
+            if color_name in words:
                 logger.debug('Found color: %s' % color_name)
                 self.action = 'hue'
                 self.value = settings.COLORS[color_name]
 
         for room_name in settings.LIGHT_GROUPS.keys():
-            if room_name in line_split:
+            if room_name in words:
                 self.room = room_name
 
-        if 'on' in line_split:
+        if 'on' in words:
             self.action = 'power'
             self.value = 'on'
-        elif 'off' in line_split:
+        elif 'off' in words:
             self.action = 'power'
             self.value = 'off'
 
         if not self.room:
-            logger.debug('No room specified. Assuming the whole house.')
-            self.room = 'house'
+            self.room = settings.DEFAULT_ROOM
