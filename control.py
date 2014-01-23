@@ -66,7 +66,7 @@ class Control:
             return True
         elif command.action == 'temperature':
             if command.value:
-                self.nest.set_temperature(degrees)
+                self.nest.set_temperature(command.value)
                 return True
             else:
                 logger.error('Could not determine a temperature.')

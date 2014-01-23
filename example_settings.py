@@ -27,3 +27,5 @@ DEFAULT_ROOM = 'house'
 
 FLAC_CONVERT = 'sox audio -t wav -r 48000 -t flac audio.flac'
 # or if you want to use flac command use 'flac -f audio'
+
+AUDIO_DEVICE = 'pulse'  # sysdefault, pulse

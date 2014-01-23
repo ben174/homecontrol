@@ -24,7 +24,7 @@ def record_command():
     '''
     from pygsr import Pygsr
     speech = Pygsr()
-    speech.record(3, 1)
+    speech.record(3)
     result = speech.speech_to_text('en-US')
     if result:
         return result[0].lower()
@@ -57,9 +57,9 @@ def setup_logging():
 
 
 def main():
+    line = record_command()
     setup_logging()
     control = Control()
-    line = record_command()
     if not line:
         logger.warn('No command recorded.')
         return
