@@ -3,14 +3,17 @@
 import RPi.GPIO as GPIO
 import automate
 
+GPIO_PIN = 3
+
 
 def main():
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(3, GPIO.IN)
+    GPIO.setup(GPIO_PIN, GPIO.IN)
     while True:
-        if GPIO.input(3):
+        button_state = GPIO.input(GPIO_PIN)
+        #print button_state
+        if button_state == 0:
             automate.main()
-
 
 def oldmain():
     GPIO.setmode(GPIO.BCM)
