@@ -75,7 +75,7 @@ class TestAutomate:
         assert command.action == 'power'
         assert command.value == 'off'
 
-    def test_office_off(self):
+    def test_house_off(self):
         ''' Make sure the whole house turns off if we don't specify a room
 
         '''
@@ -84,3 +84,18 @@ class TestAutomate:
         assert command.room == 'house'
         assert command.action == 'power'
         assert command.value == 'off'
+
+
+def get_office_lights():
+    ''' Gets the current state of my office lights so I know what values
+    to plug in to presets.
+
+    '''
+    from phue import Bridge
+    b = Bridge(settings.HUE_BRIDGE)
+    b.connect()
+    b.get_api()
+    light_index = 9
+    print b.get_light(light_index, 'on')
+    print b.get_light(light_index, 'hue')
+    print b.get_light(light_index, 'sat')

@@ -28,10 +28,16 @@ class Command:
         ''' Cleans up some common errors made by the voice interpreter.
 
         '''
-        self.command_line = self.command_line.replace('read', 'red')
-        self.command_line = self.command_line.replace('creed', 'green')
-        self.command_line = self.command_line.replace('screen', 'green')
-        self.command_line = self.command_line.replace('cream', 'green')
+        clean_output = self.command_line
+        clean_output = clean_output.replace('read', 'red')
+        clean_output = clean_output.replace('creed', 'green')
+        clean_output = clean_output.replace('screen', 'green')
+        clean_output = clean_output.replace('cream', 'green')
+        #[sub for sub in settings.SUBSTITUTIONS if sub in words]
+        if clean_output != self.command_line:
+            logger.info("I heard: %s" % self.command_line)
+            logger.info("But I corrected it to: %s" % clean_output)
+        self.command = clean_output
         #TODO: Fix the 270 degrees test
 
     def parse_command(self):

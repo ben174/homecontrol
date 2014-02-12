@@ -13,21 +13,25 @@ class Control:
     def __init__(self):
         global logger
         logger = logging.getLogger(__name__)
-
         # connect to nest
         self.nest = Nest(
             username=settings.NEST_LOGIN,
             password=settings.NEST_PASS
         )
-        self.nest.login()
-        self.nest.get_status()
-
+        try:
+            self.nest.login()
+            self.nest.get_status()
+        except:
+            logger.error("Unable to connect to NEST.")
         # connect to phillips hue
         self.bridge = Bridge(
             settings.HUE_BRIDGE
         )
-        self.bridge.connect()
-        self.bridge.get_api()
+        try:
+            self.bridge.connect()
+            self.bridge.get_api()
+        except:
+            logger.error("Unable to connect to Hue.")
 
     def execute_command(self, command):
         if command.action == 'power':

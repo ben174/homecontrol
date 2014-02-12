@@ -1,9 +1,7 @@
 from pyaudio import PyAudio, paInt16
 from wave import open as open_audio
 from urllib2 import Request, urlopen
-from os import system
-from json import loads
-import urllib2
+import json
 import subprocess
 import settings
 
@@ -19,14 +17,23 @@ class Pygsr:
                 curr_device = audio.get_device_info_by_index(i)
                 print 'Found device: %s' % curr_device['name']
                 if curr_device['name'] == settings.AUDIO_DEVICE:
-                    print 'Assigning %s (Index: %s)' % (settings.AUDIO_DEVICE, i)
+                    print 'Assigning %s (Index: %s)' % (
+                        settings.AUDIO_DEVICE, i
+                    )
                     self.device_index = i
-        elif not hasattr('device_index', self):
-            print 'No Audio device specified. Assuming index 1'
-            self.device_index = 1
+        elif not hasattr(self, 'device_index'):
+            print 'No Audio device specified. Discovering...'
+            for i in range(audio.get_device_count()):
+                curr_device = audio.get_device_info_by_index(i)
+                print 'Found device: %s' % curr_device['name']
+                if curr_device['maxInputChannels'] > 0:
+                    self.device_index = curr_device['index']
+                    print 'Using device: %s' % curr_device['name']
+                    break
         print audio.get_device_info_by_index(self.device_index)
         try:
-            calc_rate = audio.get_device_info_by_index(1)['defaultSampleRate']
+            device = audio.get_device_info_by_index(self.device_index)
+            calc_rate = device['defaultSampleRate']
             print 'Discovered Sample Rate: %s' % calc_rate
             self.rate = int(calc_rate)
         except:
@@ -37,19 +44,19 @@ class Pygsr:
         self.file = file
 
     def convert(self):
-        fh = open("NUL","w")
+        fh = open("NUL", "w")
         subprocess.call(settings.FLAC_CONVERT.split(), stdout=fh, stderr=fh)
 
     def record(self, time):
         audio = PyAudio()
         stream = audio.open(input_device_index=self.device_index,
-                    output_device_index=self.device_index,
-                    format=self.format,
-                    channels=self.channel,
-                    rate=self.rate,
-                    input=True,
-                    frames_per_buffer=self.chunk
-                )
+                            output_device_index=self.device_index,
+                            format=self.format,
+                            channels=self.channel,
+                            rate=self.rate,
+                            input=True,
+                            frames_per_buffer=self.chunk
+                            )
         print "Recording..."
         frames = []
         for i in range(0, self.rate / self.chunk * time):
@@ -67,16 +74,17 @@ class Pygsr:
         write_frames.close()
         self.convert()
 
-    def speech_to_text(self, language):
+    def speech_to_text(self):
+        language = settings.LANGUAGE
         url = "http://www.google.com/speech-api/v1/recognize?lang=%s" % language
-        file_upload = "%s.flac" % self.file
-        audio = open(file_upload, "rb").read()
+        audio = open("%s.flac" % self.file, "rb").read()
         header = {"Content-Type": "audio/x-flac; rate=48000"}
         data = Request(url, audio, header)
-        try:
-            post = urlopen(data)
-            response = post.read()
-            phrase = loads(response)['hypotheses'][0]['utterance']
-            return phrase, response
-        except:
+        post = urlopen(data)
+        response = json.loads(post.read())
+        if response['status'] != 0:
+            print "Invalid response: %s" % response['status']
+            print response
             return None
+        phrase = response['hypotheses'][0]['utterance']
+        return phrase, response
