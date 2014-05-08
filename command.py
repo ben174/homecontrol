@@ -37,7 +37,7 @@ class Command:
         if clean_output != self.command_line:
             logger.info("I heard: %s" % self.command_line)
             logger.info("But I corrected it to: %s" % clean_output)
-        self.command = clean_output
+        self.command_line = clean_output
         #TODO: Fix the 270 degrees test
 
     def parse_command(self):
