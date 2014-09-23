@@ -1,4 +1,3 @@
-from nest import Nest
 from phue import Bridge
 import settings
 import logging
@@ -14,11 +13,12 @@ class Control:
         global logger
         logger = logging.getLogger(__name__)
         # connect to nest
-        self.nest = Nest(
-            username=settings.NEST_LOGIN,
-            password=settings.NEST_PASS
-        )
         try:
+            from nest import Nest
+            self.nest = Nest(
+                username=settings.NEST_LOGIN,
+                password=settings.NEST_PASS
+            )
             self.nest.login()
             self.nest.get_status()
         except:
@@ -69,6 +69,9 @@ class Control:
                 self.bridge.set_light(light_index, 'sat', 255)
             return True
         elif command.action == 'temperature':
+            if not self.nest:
+                logger.error('Nest thermostat not initialized.')
+                return False
             if command.value:
                 self.nest.set_temperature(command.value)
                 return True

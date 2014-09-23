@@ -13,9 +13,10 @@ class Command:
     def __init__(self, command_line=None):
         global logger
         logger = logging.getLogger(__name__)
-        self.command_line = command_line
-        self.clean_command()
-        self.parse_command()
+        if command_line:
+            self.command_line = command_line
+            self.clean_command()
+            self.parse_command()
 
     def __repr__(self):
         return "Room: %s, Action: %s, Value: %s" % (
